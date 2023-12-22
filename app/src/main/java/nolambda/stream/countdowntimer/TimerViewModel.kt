@@ -20,7 +20,7 @@ class TimerViewModel(
     companion object {
         private val INITIAL_TIME = TimeUnit.MINUTES.toMillis(1)
 
-        private const val TIMER_TICK = 100L // 100ms
+        private const val TIMER_TICK = 10L // 100ms
     }
 
     private var _time = MutableStateFlow(INITIAL_TIME)
@@ -28,6 +28,9 @@ class TimerViewModel(
 
     private var _timerState = MutableStateFlow(TimerState.STOPPED)
     val timerState: StateFlow<TimerState> = _timerState
+
+    private var _indicatorProgress = MutableStateFlow(1F)
+    val indicatorProgress: StateFlow<Float> = _indicatorProgress
 
     private var timerJob: Job? = null
 
@@ -48,6 +51,7 @@ class TimerViewModel(
 
             if (resetState) {
                 _time.value = INITIAL_TIME
+                _indicatorProgress.value = 1F
             }
         }
     }
@@ -57,6 +61,7 @@ class TimerViewModel(
             while (_timerState.value == TimerState.RUNNING && _time.value > 0L) {
                 delay(TIMER_TICK)
                 _time.value -= TIMER_TICK
+                _indicatorProgress.value = _time.value.toFloat() / INITIAL_TIME
             }
             if (_time.value <= 0L) {
                 stop(resetState = false)

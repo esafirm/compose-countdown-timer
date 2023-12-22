@@ -34,8 +34,6 @@ private val CoolGreen = Color(0XFF65B788)
 
 @Composable
 fun TimerScreen(timerViewModel: TimerViewModel = koinViewModel()) {
-    val timerState by timerViewModel.timerState.collectAsState()
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -43,22 +41,17 @@ fun TimerScreen(timerViewModel: TimerViewModel = koinViewModel()) {
         contentAlignment = Alignment.Center
     ) {
         val time by timerViewModel.time.collectAsState()
+        val progress by timerViewModel.indicatorProgress.collectAsState()
 
-        CircularProgressIndicator(
-            progress = time.toFloat() / TimeUnit.MINUTES.toMillis(1),
-            color = CoolGreen,
-            strokeWidth = 10.dp,
-            strokeCap = StrokeCap.Round,
-            modifier = Modifier
-                .height(220.dp)
-                .width(220.dp)
-        )
+        CircleIndicator(progress = progress)
 
         Row {
             Text(text = "${time / 60000}:", style = TimerTextStyle) // minutes
-            Text(text = "${time / 1000 % 60}:", style = TimerTextStyle) // seconds
-            Text(text = "${time % 1000 / 100}", style = TimerTextStyle) // milliseconds
+            Text(text = "${time / 1000 % 60}.", style = TimerTextStyle) // seconds
+            Text(text = "${time % 1000 / 10}", style = TimerTextStyle) // milliseconds
         }
+
+        val timerState by timerViewModel.timerState.collectAsState()
 
         Row(
             modifier = Modifier.align(Alignment.BottomCenter),
@@ -73,4 +66,17 @@ fun TimerScreen(timerViewModel: TimerViewModel = koinViewModel()) {
             }
         }
     }
+}
+
+@Composable
+private fun CircleIndicator(progress: Float) {
+    CircularProgressIndicator(
+        progress = progress,
+        color = CoolGreen,
+        strokeWidth = 10.dp,
+        strokeCap = StrokeCap.Round,
+        modifier = Modifier
+            .height(220.dp)
+            .width(220.dp)
+    )
 }

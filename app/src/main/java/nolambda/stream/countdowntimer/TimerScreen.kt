@@ -23,6 +23,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.koin.androidx.compose.koinViewModel
 import java.util.concurrent.TimeUnit
@@ -42,14 +43,16 @@ fun TimerScreen(timerViewModel: TimerViewModel = koinViewModel()) {
             .padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
-        val time by timerViewModel.timeText.collectAsState()
-        val progress by timerViewModel.indicatorProgress.collectAsState()
+        val time by timerViewModel.timeText.collectAsStateWithLifecycle()
+        val progress by timerViewModel.indicatorProgress.collectAsStateWithLifecycle()
 
         CircleIndicator(progress = progress)
 
         Text(text = time, style = TimerTextStyle)
 
-        val timerState by timerViewModel.timerState.collectAsState()
+        val timerState by timerViewModel.timerState.collectAsStateWithLifecycle()
+
+        println("---> timerState: $timerState")
 
         Row(
             modifier = Modifier.align(Alignment.BottomCenter),

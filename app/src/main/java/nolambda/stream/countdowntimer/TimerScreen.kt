@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -40,16 +41,12 @@ fun TimerScreen(timerViewModel: TimerViewModel = koinViewModel()) {
             .padding(32.dp),
         contentAlignment = Alignment.Center
     ) {
-        val time by timerViewModel.time.collectAsState()
+        val time by timerViewModel.timeText.collectAsState()
         val progress by timerViewModel.indicatorProgress.collectAsState()
 
         CircleIndicator(progress = progress)
 
-        Row {
-            Text(text = "${time / 60000}:", style = TimerTextStyle) // minutes
-            Text(text = "${time / 1000 % 60}.", style = TimerTextStyle) // seconds
-            Text(text = "${time % 1000 / 10}", style = TimerTextStyle) // milliseconds
-        }
+        Text(text = time, style = TimerTextStyle)
 
         val timerState by timerViewModel.timerState.collectAsState()
 
@@ -75,8 +72,6 @@ private fun CircleIndicator(progress: Float) {
         color = CoolGreen,
         strokeWidth = 10.dp,
         strokeCap = StrokeCap.Round,
-        modifier = Modifier
-            .height(220.dp)
-            .width(220.dp)
+        modifier = Modifier.size(260.dp)
     )
 }

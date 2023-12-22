@@ -2,8 +2,6 @@ package nolambda.stream.countdowntimer
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -20,11 +18,19 @@ class TimerViewModel(
     companion object {
         private val INITIAL_TIME = TimeUnit.MINUTES.toMillis(1)
 
-        private const val TIMER_TICK = 10L // 100ms
+        private const val TIMER_TICK = 10L // 10ms
+        private const val ZERO_TIME_TEXT = "00:00.00"
     }
 
-    private var _time = MutableStateFlow(INITIAL_TIME)
-    val time: StateFlow<Long> = _time
+    private val initialTimeText = String.format(
+        "%02d:%02d.%02d",
+        TimeUnit.MILLISECONDS.toMinutes(INITIAL_TIME),
+        TimeUnit.MILLISECONDS.toSeconds(INITIAL_TIME) % 60,
+        TimeUnit.MILLISECONDS.toMillis(INITIAL_TIME) % 100
+    )
+
+    private var _time = MutableStateFlow(initialTimeText)
+    val timeText: StateFlow<String> = _time
 
     private var _timerState = MutableStateFlow(TimerState.STOPPED)
     val timerState: StateFlow<TimerState> = _timerState
@@ -32,40 +38,54 @@ class TimerViewModel(
     private var _indicatorProgress = MutableStateFlow(1F)
     val indicatorProgress: StateFlow<Float> = _indicatorProgress
 
-    private var timerJob: Job? = null
+    private val timer = object : ResumeableCountDownTimer(INITIAL_TIME, TIMER_TICK) {
+        override fun onTimerTick(millisUntilFinished: Long) {
+
+            // Format the time to be displayed "00:00.00"
+            val formattedTime = String.format(
+                "%02d:%02d.%02d",
+                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished),
+                TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % 60,
+                TimeUnit.MILLISECONDS.toMillis(millisUntilFinished) % 100
+            )
+
+            _time.value = formattedTime
+            _indicatorProgress.value = millisUntilFinished.toFloat() / INITIAL_TIME
+        }
+
+        override fun onTimerFinish() {
+            stop(resetState = false)
+            onTimerEnd()
+        }
+    }
 
     fun startOrPause() {
-        _timerState.value = when (_timerState.value) {
+        val nextValue = when (_timerState.value) {
             TimerState.RUNNING -> TimerState.PAUSED
             TimerState.PAUSED, TimerState.STOPPED -> TimerState.RUNNING
         }
-        if (_timerState.value == TimerState.RUNNING) {
-            startTimer()
+
+        when (nextValue) {
+            TimerState.RUNNING -> timer.start()
+            TimerState.PAUSED -> timer.pause()
+            TimerState.STOPPED -> {}
         }
+
+        _timerState.value = nextValue
     }
 
     fun stop(resetState: Boolean = true) {
         viewModelScope.launch {
-            timerJob?.cancel()
+            timer.restart()
             _timerState.value = TimerState.STOPPED
 
             if (resetState) {
-                _time.value = INITIAL_TIME
+                _time.value = initialTimeText
                 _indicatorProgress.value = 1F
-            }
-        }
-    }
-
-    private fun startTimer() {
-        timerJob = viewModelScope.launch {
-            while (_timerState.value == TimerState.RUNNING && _time.value > 0L) {
-                delay(TIMER_TICK)
-                _time.value -= TIMER_TICK
-                _indicatorProgress.value = _time.value.toFloat() / INITIAL_TIME
-            }
-            if (_time.value <= 0L) {
-                stop(resetState = false)
-                onTimerEnd()
+            } else {
+                // Make sure the time is 00:00.00
+                _time.value = ZERO_TIME_TEXT
+                _indicatorProgress.value = 0F
             }
         }
     }

@@ -1,5 +1,6 @@
 package nolambda.stream.countdowntimer
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -58,8 +59,10 @@ fun TimerScreen(timerViewModel: TimerViewModel = koinViewModel()) {
                 Text(if (timerState == TimerState.RUNNING) "Pause" else "Start")
             }
 
-            Button(onClick = timerViewModel::stop) {
-                Text("Stop")
+            AnimatedVisibility(visible = timerState != TimerState.STOPPED) {
+                Button(onClick = timerViewModel::stop) {
+                    Text("Stop")
+                }
             }
         }
     }

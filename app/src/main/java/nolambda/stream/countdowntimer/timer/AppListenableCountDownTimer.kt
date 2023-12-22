@@ -1,35 +1,41 @@
-package nolambda.stream.countdowntimer
+package nolambda.stream.countdowntimer.timer
 
 import android.os.CountDownTimer
 
 /**
  * A CountDownTimer that can be paused and resumed
  */
-abstract class ResumeableCountDownTimer(
+class AppListenableCountDownTimer(
     private val millisInFuture: Long,
     private val interval: Long
-) {
+) : ListenableCountDownTimer {
 
     private lateinit var countDownTimer: CountDownTimer
     private var remainingTime: Long = 0
     private var isTimerPaused: Boolean = true
 
+    private var listener: CountDownListener? = null
+
     init {
         this.remainingTime = millisInFuture
     }
 
+    override fun addListener(listener: CountDownListener) {
+        this.listener = listener
+    }
+
     @Synchronized
-    fun start() {
+    override fun start() {
         if (isTimerPaused) {
             countDownTimer = object : CountDownTimer(remainingTime, interval) {
                 override fun onFinish() {
-                    onTimerFinish()
+                    listener?.onFinish()
                     restart()
                 }
 
                 override fun onTick(millisUntilFinished: Long) {
                     remainingTime = millisUntilFinished
-                    onTimerTick(millisUntilFinished)
+                    listener?.onTick(millisUntilFinished)
                 }
 
             }.apply {
@@ -39,20 +45,16 @@ abstract class ResumeableCountDownTimer(
         }
     }
 
-    fun pause() {
+    override fun pause() {
         if (!isTimerPaused) {
             countDownTimer.cancel()
         }
         isTimerPaused = true
     }
 
-    fun restart() {
+    override fun restart() {
         countDownTimer.cancel()
         remainingTime = millisInFuture
         isTimerPaused = true
     }
-
-    abstract fun onTimerTick(millisUntilFinished: Long)
-    abstract fun onTimerFinish()
-
 }

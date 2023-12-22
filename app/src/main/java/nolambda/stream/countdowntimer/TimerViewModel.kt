@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import nolambda.stream.countdowntimer.timer.AppListenableCountDownTimer
+import nolambda.stream.countdowntimer.timer.CountDownListener
+import nolambda.stream.countdowntimer.timer.ListenableCountDownTimer
 import java.util.concurrent.TimeUnit
 
 /**
@@ -12,7 +15,8 @@ import java.util.concurrent.TimeUnit
  */
 class TimerViewModel(
     private val timerNotificationManager: TimerNotificationManager,
-    private val appBackgroundDetector: BackgroundDetector
+    private val appBackgroundDetector: BackgroundDetector,
+    private val timer: ListenableCountDownTimer = AppListenableCountDownTimer(INITIAL_TIME, TIMER_TICK)
 ) : ViewModel() {
 
     companion object {
@@ -38,25 +42,26 @@ class TimerViewModel(
     private var _indicatorProgress = MutableStateFlow(1F)
     val indicatorProgress: StateFlow<Float> = _indicatorProgress
 
-    private val timer = object : ResumeableCountDownTimer(INITIAL_TIME, TIMER_TICK) {
-        override fun onTimerTick(millisUntilFinished: Long) {
+    init {
+        timer.addListener(object : CountDownListener {
+            override fun onTick(millisUntilFinished: Long) {
+                // Format the time to be displayed "00:00.00"
+                val formattedTime = String.format(
+                    "%02d:%02d.%02d",
+                    TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished),
+                    TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % 60,
+                    TimeUnit.MILLISECONDS.toMillis(millisUntilFinished) % 100
+                )
 
-            // Format the time to be displayed "00:00.00"
-            val formattedTime = String.format(
-                "%02d:%02d.%02d",
-                TimeUnit.MILLISECONDS.toMinutes(millisUntilFinished),
-                TimeUnit.MILLISECONDS.toSeconds(millisUntilFinished) % 60,
-                TimeUnit.MILLISECONDS.toMillis(millisUntilFinished) % 100
-            )
+                _time.value = formattedTime
+                _indicatorProgress.value = millisUntilFinished.toFloat() / INITIAL_TIME
+            }
 
-            _time.value = formattedTime
-            _indicatorProgress.value = millisUntilFinished.toFloat() / INITIAL_TIME
-        }
-
-        override fun onTimerFinish() {
-            stop(resetState = false)
-            onTimerEnd()
-        }
+            override fun onFinish() {
+                stop(resetState = false)
+                onTimerEnd()
+            }
+        })
     }
 
     fun startOrPause() {

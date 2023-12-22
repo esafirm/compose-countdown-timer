@@ -63,6 +63,8 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:$koin_version")
 
     testImplementation("junit:junit:4.13.2")
+    testImplementation("io.insert-koin:koin-test-junit4:$koin_version")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
 
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

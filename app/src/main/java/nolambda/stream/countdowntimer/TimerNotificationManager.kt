@@ -6,10 +6,16 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 
+/**
+ * An interface to handle notification related to timer
+ */
 interface TimerNotificationManager {
     fun showTimerUpNotification()
 }
 
+/**
+ * A [TimerNotificationManager] implementation that uses [NotificationManager]
+ */
 class AppTimerNotificationManager(
     private val context: Context
 ) : TimerNotificationManager {

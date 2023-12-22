@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
+/**
+ * A [ViewModel] for timer screen
+ */
 class TimerViewModel(
     private val timerNotificationManager: TimerNotificationManager,
     private val appBackgroundDetector: BackgroundDetector
@@ -38,11 +41,14 @@ class TimerViewModel(
         }
     }
 
-    fun stop() {
+    fun stop(resetState: Boolean = true) {
         viewModelScope.launch {
             timerJob?.cancel()
             _timerState.value = TimerState.STOPPED
-            _time.value = INITIAL_TIME
+
+            if (resetState) {
+                _time.value = INITIAL_TIME
+            }
         }
     }
 
@@ -53,7 +59,7 @@ class TimerViewModel(
                 _time.value -= TIMER_TICK
             }
             if (_time.value <= 0L) {
-                stop()
+                stop(resetState = false)
                 onTimerEnd()
             }
         }

@@ -5,9 +5,21 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 
-object AppBackgroundDetector {
+/**
+ * This is a simple interface to detect if the app is in background or not.
+ */
+interface BackgroundDetector {
+    fun isInBackground(): Boolean
+}
 
-    var isInBackground = false
+/**
+ * This is a simple implementation of [BackgroundDetector] using [ProcessLifecycleOwner].
+ */
+object AppBackgroundDetector : BackgroundDetector {
+
+    private var isInBackground = false
+
+    override fun isInBackground(): Boolean = isInBackground
 
     fun startListening() {
         ProcessLifecycleOwner.get().lifecycle.addObserver(object : LifecycleEventObserver {

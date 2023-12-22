@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import java.util.concurrent.TimeUnit
 
 private val TimerTextStyle = TextStyle(
@@ -32,7 +33,7 @@ private val TimerTextStyle = TextStyle(
 private val CoolGreen = Color(0XFF65B788)
 
 @Composable
-fun TimerScreen(timerViewModel: TimerViewModel = viewModel()) {
+fun TimerScreen(timerViewModel: TimerViewModel = koinViewModel()) {
     val timerState by timerViewModel.timerState.collectAsState()
 
     Box(

@@ -6,16 +6,20 @@ import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
 
-class TimerNotificationManager(
+interface TimerNotificationManager {
+    fun showTimerUpNotification()
+}
+
+class AppTimerNotificationManager(
     private val context: Context
-) {
+) : TimerNotificationManager {
     private val appContext get() = context.applicationContext
 
     private val notificationManager by lazy {
         appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
-    private fun showTimerUpNotification() {
+    override fun showTimerUpNotification() {
         val notificationChannelId = "timer_channel"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

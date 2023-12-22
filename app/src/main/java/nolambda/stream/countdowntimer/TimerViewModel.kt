@@ -9,7 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-class TimerViewModel : ViewModel() {
+class TimerViewModel(
+    private val timerNotificationManager: TimerNotificationManager,
+    private val appBackgroundDetector: BackgroundDetector
+) : ViewModel() {
 
     companion object {
         private val INITIAL_TIME = TimeUnit.MINUTES.toMillis(1)
@@ -60,9 +63,9 @@ class TimerViewModel : ViewModel() {
      * A callback when timer is ended
      */
     private fun onTimerEnd() {
-        val isInBackground = AppBackgroundDetector.isInBackground
+        val isInBackground = appBackgroundDetector.isInBackground()
         if (isInBackground) {
-            // show notification
+            timerNotificationManager.showTimerUpNotification()
         }
     }
 }

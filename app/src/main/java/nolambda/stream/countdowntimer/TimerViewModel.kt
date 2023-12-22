@@ -1,10 +1,8 @@
 package nolambda.stream.countdowntimer
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import nolambda.stream.countdowntimer.timer.AppListenableCountDownTimer
 import nolambda.stream.countdowntimer.timer.CountDownListener
 import nolambda.stream.countdowntimer.timer.ListenableCountDownTimer
@@ -80,18 +78,16 @@ class TimerViewModel(
     }
 
     fun stop(resetState: Boolean = true) {
-        viewModelScope.launch {
-            timer.restart()
-            _timerState.value = TimerState.STOPPED
+        timer.restart()
+        _timerState.value = TimerState.STOPPED
 
-            if (resetState) {
-                _time.value = initialTimeText
-                _indicatorProgress.value = 1F
-            } else {
-                // Make sure the time is 00:00.00
-                _time.value = ZERO_TIME_TEXT
-                _indicatorProgress.value = 0F
-            }
+        if (resetState) {
+            _time.value = initialTimeText
+            _indicatorProgress.value = 1F
+        } else {
+            // Make sure the time is 00:00.00
+            _time.value = ZERO_TIME_TEXT
+            _indicatorProgress.value = 0F
         }
     }
 

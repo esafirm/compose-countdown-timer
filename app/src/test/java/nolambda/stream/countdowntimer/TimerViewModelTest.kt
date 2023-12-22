@@ -15,10 +15,6 @@ import org.junit.Test
 @ExperimentalCoroutinesApi
 class TimerViewModelTest {
 
-    @ExperimentalCoroutinesApi
-    @get:Rule
-    var mainCoroutineRule = MainCoroutineRule(UnconfinedTestDispatcher())
-
     private lateinit var timerNotificationManager: TestTimerNotificationManager
     private lateinit var appBackgroundDetector: TestBackgroundDetector
     private lateinit var timerViewModel: TimerViewModel
@@ -33,14 +29,14 @@ class TimerViewModelTest {
     }
 
     @Test
-    fun `when timer is started, state should be RUNNING`() = runTest {
+    fun `when timer is started, state should be RUNNING`() {
         timerViewModel.startOrPause()
 
         assertEquals(TimerState.RUNNING, timerViewModel.timerState.value)
     }
 
     @Test
-    fun `when timer is paused, state should be PAUSED`() = runTest {
+    fun `when timer is paused, state should be PAUSED`() {
         timerViewModel.startOrPause() // Start
         timerViewModel.startOrPause() // Pause
 
@@ -48,7 +44,7 @@ class TimerViewModelTest {
     }
 
     @Test
-    fun `when timer is stopped, state should be STOPPED and time should be reset`() = runTest {
+    fun `when timer is stopped, state should be STOPPED and time should be reset`() {
         timerViewModel.startOrPause() // Start
         timerViewModel.stop() // Stop
 
@@ -57,7 +53,7 @@ class TimerViewModelTest {
     }
 
     @Test
-    fun `when timer ends, notification should be shown if app is in background`() = runTest {
+    fun `when timer ends, notification should be shown if app is in background`() {
         appBackgroundDetector.isInBackgroundValue = true
 
         // Simulate timer is finished
@@ -68,7 +64,7 @@ class TimerViewModelTest {
     }
 
     @Test
-    fun `when timer ends, notification should not be shown if app is in foreground`() = runTest {
+    fun `when timer ends, notification should not be shown if app is in foreground`() {
         appBackgroundDetector.isInBackgroundValue = false
 
         // Simulate timer is finished

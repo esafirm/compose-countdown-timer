@@ -62,6 +62,12 @@ class TimerViewModel(
         })
     }
 
+    override fun onCleared() {
+        // Stop the timer on clear to avoid temporary
+        // leak on the timer
+        timer.restart()
+    }
+
     fun startOrPause() {
         val nextValue = when (_timerState.value) {
             TimerState.RUNNING -> TimerState.PAUSED

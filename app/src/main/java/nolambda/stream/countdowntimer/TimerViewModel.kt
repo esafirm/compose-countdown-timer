@@ -51,7 +51,18 @@ class TimerViewModel : ViewModel() {
             }
             if (_time.value <= 0L) {
                 stop()
+                onTimerEnd()
             }
+        }
+    }
+
+    /**
+     * A callback when timer is ended
+     */
+    private fun onTimerEnd() {
+        val isInBackground = AppBackgroundDetector.isInBackground
+        if (isInBackground) {
+            // show notification
         }
     }
 }
